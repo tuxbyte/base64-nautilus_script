@@ -2,9 +2,17 @@
 
 This script converts your files to plain text on base64, just as you can undo it. Streamline your use of images embedded in your web or simply hide a plain text file at a glance from an inexperienced person.
 
+Its use is as simple as adding it to the script folder for nautilus __(~/.local/share/nautilus/scripts)__ and giving it run permissions with:
+
+**chmod +x "(De)codificar base64"**
+
 ----------
 
 Este script convierte tus ficheros a texto plano en base64, de la misma manera que los puede deshacer. Agilice su uso de imágenes embebidas en su web o simplemente esconda un fichero en texto plano a simple vista de alguien inexperto.
+
+Su uso es tan simple como agregarlo a la carpeta de scripts para nautilus __(~/.local/share/nautilus/scripts)__ y darle permisos de ejecución con:
+
+**chmod +x "(De)codificar base64"**
 
 ----------
 Si este script ha sido de tu agrado puedes apoyarme con algunos satoshis. If this script has been to your liking you can support me with some satoshis:).
