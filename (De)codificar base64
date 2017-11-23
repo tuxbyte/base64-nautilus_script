@@ -1,0 +1,81 @@
+#!/usr/bin/env bash
+# Script for {en,de}coding files to base 64 text.
+# Written entirely by tuxbyte under the GNU GPL 3 license.
+# https://www.gnu.org/licenses/gpl-3.0.en.html
+
+readonly SCRIPT="${0##*/}"
+
+# exec 5> "${SCRIPT%.*}.log"
+# BASH_XTRACEFD="5"
+# gnome-terminal -x bash -c "watch -tn.1 \"tail -n20 '${SCRIPT%.*}.log'\""
+# set -x
+
+ARCHIVOS="$NAUTILUS_SCRIPT_SELECTED_FILE_PATHS"
+ARCHIVOS="${ARCHIVOS// /␣}"
+
+declare -a ARCHIVOS=(${ARCHIVOS//$'\n'/ })
+
+for ARCHIVO in "${!ARCHIVOS[@]}"; do
+	declare -a ARCHIVOS[$ARCHIVO]=${ARCHIVOS[$ARCHIVO]//␣/ }
+	declare -a ARCHIVOS[$ARCHIVO]=${ARCHIVOS[$ARCHIVO]##*/}
+done
+
+UPPER_LOWER() {
+	case "$1" in
+		[[:lower:]])
+			echo -n "${1^^}"
+			;;
+		[[:upper:]])
+			echo -n "${1,,}"
+			;;
+		*)
+			echo -n "$1"
+			;;
+	esac
+}
+RGX_EXT() {
+	local CARACTER CADENA
+
+	for ((I = 0; I < ${#1}; I++ )); do
+		CARACTER="${1:$I:1}"
+
+		if [[ $CARACTER =~ [[:alpha:]] ]]; then
+			CADENA+=$(echo -n "[$CARACTER$(UPPER_LOWER "$CARACTER")]")
+		else
+			CADENA+=$(echo -n "$CARACTER")
+		fi
+	done
+
+	echo $CADENA
+}
+
+ACCION() {
+	ARCHIVO="$1"
+
+	if [[ ${DECODIFICACION:-false} = true ]]; then
+		base64 -d "$ARCHIVO" > "${ARCHIVO%.*}"
+		notify-send -i "emblem-ok-symbolic" -u "normal" "Proceso completado" "El archivo «$ARCHIVO» se ha decodificado."
+	else
+		base64 -w0 "$ARCHIVO" > "${ARCHIVO}.txt"
+		notify-send -i "emblem-ok-symbolic" -u "normal" "Proceso completado" "El archivo «$ARCHIVO» se ha codificado."
+	fi
+
+	unset DECODIFICACION
+}
+
+declare -ra EXTENSIONES=(txt)
+
+for ARCHIVO in "${!ARCHIVOS[@]}"; do
+	if ! [[ -f "${ARCHIVOS[$ARCHIVO]}" ]]; then
+		notify-send -i "dialog-error-symbolic" -u "normal" "El archivo '${ARCHIVOS[$ARCHIVO]}' no es valido" "Solo ficheros o paquetes, no directorios."
+		exit 1
+	fi
+
+	for EXT in "${EXTENSIONES[@]}"; do
+		if [[ "${ARCHIVOS[$ARCHIVO]##*.}" = $(RGX_EXT "$EXT") ]]; then
+			DECODIFICACION=true
+		fi
+	done
+
+	ACCION "${ARCHIVOS[$ARCHIVO]}"
+done
